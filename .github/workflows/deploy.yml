@@ -65,6 +65,9 @@ jobs:
           name: dist-files
           path: dist
   deploy:
+    permissions: 
+      id-token: write
+      contents: read    
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -77,6 +80,19 @@ jobs:
           path: ./dist
       - name: Output contents
         run: ls
+      - name: Get AWS Permissions
+        uses: aws-actions/configure-aws-credentials
+        with:
+          role-to-assume: arn:aws:iam::307946639120:role/GitHubDemo1
+          role-session-name: samplerolesession
+          aws-region: us-east-1
+      - name: Deploy site
+        id: deploy-site
+        uses: ./.github/myactions/deploy-s3-docker                    # THIS IS THE ONLY DIFFERENCE BETWEEN docker and node custom action
+        with:
+          bucket: gha-security-demo-jgs
+          dist-folder: ./dist
+
       # The following steps are placeholders for a CUSTOM docker ACTION for the actual deployment process, which would involve using AWS credentials and a custom action to deploy to S3. Since the credentials and bucket information are not set, these steps are commented out for now.
       # - name: Deploy site
       #   id: deploy-site
